@@ -1,5 +1,4 @@
 name: Laravel
-#Forked Test Env
 
 on:
   push:
@@ -15,26 +14,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Decode SSH PEM Key
-      run: |
-        echo "${{ secrets.SSH_PEM_KEY }}" | base64 -d > $HOME/ssh_key.pem
-        chmod 400 $HOME/ssh_key.pem
-        cat $HOME/ssh_key.pem
-    - name: List environment variables
-      run: |
-        printenv | sort
-
+    # No decoding step needed here. We will pass the secret directly to the SSH action.
 
     - name: Push code to EC2
       run: |
-        rsync -avz --exclude='.env' --exclude='storage/*' --exclude='node_modules' --exclude='vendor' -e "ssh -o StrictHostKeyChecking=no -i $HOME/ssh_key.pem" ./ ubuntu@ec2-18-216-174-182.us-east-2.compute.amazonaws.com:/home/ubuntu/clicktabs_master/
+        rsync -avz --exclude='.env' --exclude='storage/*' --exclude='node_modules' --exclude='vendor' -e "ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PEM_KEY }}" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/clicktabs_master/
 
     - name: SSH and Composer commands on EC2
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
-        key: ${{ secrets.SSH_PEM_KEY }}
+        key: ${{ secrets.SSH_PEM_KEY }} # This is the base64-encoded PEM key
         script: |
           sudo cp -r /home/ubuntu/clicktabs_master/* /var/www/clicktabs_master/
           sudo chown -R www-data:www-data /var/www/clicktabs_master
