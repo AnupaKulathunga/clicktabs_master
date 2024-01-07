@@ -16,9 +16,9 @@ jobs:
 
     # No decoding step needed here. We will pass the secret directly to the SSH action.
 
-    - name: Push code to EC2
-      run: |
-        rsync -avz --exclude='.env' --exclude='storage/*' --exclude='node_modules' --exclude='vendor' -e "ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PEM_KEY }}" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/clicktabs_master/
+    # - name: Push code to EC2
+    #   run: |
+    #     rsync -avz --exclude='.env' --exclude='storage/*' --exclude='node_modules' --exclude='vendor' -e "ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PEM_KEY }}" ./ ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/clicktabs_master/
 
     - name: SSH and Composer commands on EC2
       uses: appleboy/ssh-action@master
